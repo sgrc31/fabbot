@@ -3,30 +3,32 @@
 import discord
 import asyncio
 from miotoken import miotoken as miotoken
+from discord import User
+from discord.ext import commands
+
 
 print('bella')
 
-client = discord.Client()
+fabbot = commands.Bot(command_prefix='!')
 
-@client.event
+@fabbot.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
+    print("Client logged in")
+    print(fabbot.user.name)
+    print(fabbot.user.id)
+    print('--------')
 
-@client.event
-async def on_message(message):
-    if message.content.startswith('!test'):
-        counter = 0
-        tmp = await client.send_message(message.channel, 'Calculating messages...')
-        async for log in client.logs_from(message.channel, limit=100):
-            if log.author == message.author:
-                counter += 1
+@fabbot.command(pass_context = True)
+async def botsay(ctx, *args):
+    mesg = ' '.join(args)
+    await fabbot.delete_message(ctx.message)
+    return await fabbot.say(mesg)
 
-        await client.edit_message(tmp, 'You have {} messages.'.format(counter))
-    elif message.content.startswith('!sleep'):
-        await asyncio.sleep(5)
-        await client.send_message(message.channel, 'Done sleeping')
+@fabbot.command()
+async def hello(*args):
+    print(User.display_name)
+    return await fabbot.say("Hello, world!")
 
-client.run(miotoken)
+if __name__ == '__main__':
+    fabbot.run(miotoken)
+
