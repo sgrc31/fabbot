@@ -5,6 +5,8 @@ import discord
 import datetime
 import asyncio
 import time
+import os
+import sys
 import peewee as pw
 from discord import User
 from discord.ext import commands
@@ -13,12 +15,12 @@ from miotoken import miotoken as miotoken
 
 logging.basicConfig(level=logging.INFO)
 start_time = time.time()
-db = pw.SqliteDatabase('fabbot.db', pragmas=('foreign_keys', True))
+db = pw.SqliteDatabase('fabsqlite.db', pragmas=(('foreign_keys', True),))
 fabbot = commands.Bot(command_prefix=commands.when_mentioned_or('!'))
 
-def create_db_tables():
+def create_db_tables(tables=[]):
     with db:
-        db.create_tables([Tag])
+        db.create_tables(tables)
 
 class BaseModel(pw.Model):
     class Meta:
@@ -130,5 +132,10 @@ async def uptime():
                                                                                                     ))
 
 if __name__ == '__main__':
+    if not os.path.exists('fabsqlite.db'):
+        logging.info('Nessun database trovato, ne creo uno e esco')
+        create_db_tables([Tag])
+        sys.exit()
+    logging.info('Database trovato')
     fabbot.run(miotoken)
 
