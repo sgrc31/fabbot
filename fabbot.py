@@ -7,10 +7,10 @@ import asyncio
 import time
 import os
 import sys
+import secrets
 import peewee as pw
 from discord import User
 from discord.ext import commands
-from miotoken import miotoken as miotoken
 
 
 logging.basicConfig(level=logging.INFO)
@@ -84,14 +84,15 @@ async def mcu(ctx):
     """Fornisce tutti i dati necessari alla connessione con il sistema BlueJeans
     per seguire lezioni, reviews e lectures"""
     return await fabbot.say('**NB: Limitarsi ad una connessione per lab durante lezioni e recitations**\n\n'
-                            'url: https://bluejeans.com/academany/6294\n\n'
-                            'oppure ID: **448190928** \| Pin: **6294** da utilizzare con il client bluejeans'
+                            'url: {}\n\n'
+                            'oppure ID: **{}** \| Pin: **{}** da utilizzare con il client bluejeans'
                             ', scaricabile da <https://www.bluejeans.com/downloads>\n\n'
                             '{}'
                             'indirizzo screensharing \(nessun limite di connessioni\):'
                             ' http://screen.academany.org/'
-                            .format('ip da inserire nel sistema di videoconferenza: **199.48.152.152**\n\n'
+                            .format(secrets.bjurl, secrets.bjid, secrets.bjpin, 'ip da inserire nel sistema di videoconferenza: **{}**\n\n'
                                     if ctx.message.channel.id == '405377785176260609' else 'e sticazzi?\n')
+                            .format(secrets.bjip)
                             )
 
 
@@ -155,5 +156,5 @@ if __name__ == '__main__':
         create_db_tables([Tag])
         sys.exit()
     logging.info('Database trovato')
-    fabbot.run(miotoken)
+    fabbot.run(secrets.miotoken)
 
