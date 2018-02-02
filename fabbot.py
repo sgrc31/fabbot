@@ -46,15 +46,15 @@ async def on_ready():
 
 
 @fabbot.command(pass_context=True, hidden=True)
-async def botsay(ctx, *args):
-    mesg = ' '.join(args)
+async def botsay(ctx):
+    mesg = ctx.message.content[8:]
     await fabbot.delete_message(ctx.message)
     return await fabbot.say(mesg)
 
 
 @fabbot.command(pass_context=True, hidden=True)
-async def botmock(ctx, *args):
-    mesg = ' '.join(args)
+async def botmock(ctx):
+    mesg = ctx.message.content[9:]
     mockmsg = ''.join([y.lower() if x % 2 else y.upper() for (x, y) in enumerate(mesg)])
     await fabbot.delete_message(ctx.message)
     return await fabbot.say(mockmsg)
@@ -79,26 +79,29 @@ async def listato(ctx):
 @fabbot.command('videoconferenza',
                 pass_context=True,
                 brief='dati di accesso al sistema di videoconferenza per lezioni, reviews e lectures',
-                help='dati di accesso al sistema di videoconferenza per lezioni, reviews e lectures'
                 )
 async def mcu(ctx):
     """Fornisce tutti i dati necessari alla connessione con il sistema BlueJeans
     per seguire lezioni, reviews e lectures"""
-    await fabbot.say('**NB: Limitarsi ad una connessione per lab durante lezioni e recitations**')
-    await fabbot.say('url: https://bluejeans.com/academany/6294')
-    await fabbot.say('oppure ID: **448190928** \| Pin: **6294** da utilizzare con il client bluejeans, scaricabile da https://www.bluejeans.com/downloads')
-    if str(ctx.message.channel) == 'santachiarafablab':
-        await fabbot.say('ip da inserire nel sistema di videoconferenza: **199.48.152.152**')
-    await fabbot.say('indirizzo screensharing \(nessun limite di connessioni\): http://screen.academany.org/')
+    return await fabbot.say('**NB: Limitarsi ad una connessione per lab durante lezioni e recitations**\n\n'
+                            'url: https://bluejeans.com/academany/6294\n\n'
+                            'oppure ID: **448190928** \| Pin: **6294** da utilizzare con il client bluejeans'
+                            ', scaricabile da <https://www.bluejeans.com/downloads>\n\n'
+                            '{}'
+                            'indirizzo screensharing \(nessun limite di connessioni\):'
+                            ' http://screen.academany.org/'
+                            .format('ip da inserire nel sistema di videoconferenza: **199.48.152.152**\n\n'
+                                    if ctx.message.channel.id == '405377785176260609' else 'e sticazzi?\n')
+                            )
 
 
 #@fabbot.before_invoke(open_db_connection)
 #@fabbot.after_invoke(close_db_connection)
-@fabbot.command('addtag',
+@fabbot.command('tagadd',
                 pass_context=True,
                 brief='crea una tag per archiviare i link'
                 )
-async def addtag(ctx, *args):
+async def tagadd(ctx, *args):
     """Aggiunge uno (o più) tag per l'archiviazione dei link."""
     if len(args) < 1 :
         return await fabbot.say('Inserisci almeno una tag. Per maggiori informazioni digita !help addtag')
@@ -130,6 +133,21 @@ async def uptime():
                                                                                                     int(round(minute)),
                                                                                                     int(round(second))
                                                                                                     ))
+
+
+@fabbot.command('desiderata',
+                brief='invia richiesta per aggiungere funzionalità al bot',
+                pass_context=True
+                )
+async def desiderata(ctx, *args):
+    """Invia un suggerimento agli amministrazioni sulle funzionalità che
+    vorresti vedere aggiunte al bot"""
+    if len(args) == 0:
+        return await fabbot.say('{} non credo di aver capito. Digita \'!help desiderata\' per maggiori informazioni'.format(ctx.message.author.mention))
+    await fabbot.say('Grazie {}. La tua richiesta è stata inoltrata a chi di dovere.'.format(ctx.message.author.mention))
+    destination = ctx.message.server.get_member('118482952672772103')
+    return await fabbot.send_message(destination, '{} > da **{}**: {}'.format(ctx.message.timestamp, ctx.message.author, ctx.message.content))
+
 
 if __name__ == '__main__':
     if not os.path.exists('fabsqlite.db'):
