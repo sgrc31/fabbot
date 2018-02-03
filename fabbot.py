@@ -15,8 +15,9 @@ from discord.ext import commands
 
 logging.basicConfig(level=logging.INFO)
 start_time = time.time()
-db = pw.SqliteDatabase('fabsqlite.db', pragmas=(('foreign_keys', True),))
+db = pw.SqliteDatabase('fabdb.db', pragmas=(('foreign_keys', True),))
 fabbot = commands.Bot(command_prefix=commands.when_mentioned_or('!'))
+
 
 def create_db_tables(tables=[]):
     with db:
@@ -29,13 +30,20 @@ class BaseModel(pw.Model):
 class Tag(BaseModel):
     tag = pw.CharField(unique=True)
 
-#class LinkToTag(pw.Model):
-#    """A simple "through" table for many-to-many relationship."""
-#    blog = ForeignKeyField(Blog)
-#    tag = ForeignKeyField(Tag)
-#
-#    class Meta:
-#        primary_key = CompositeKey('blog', 'tag')
+class Link(BaseModel):
+    title = pw.CharField()
+    url = pw.CharField()
+    description = pw.CharField()
+
+class LinkToTag(pw.Model):
+    """A simple "through" table for many-to-many relationship."""
+    link_id = pw.ForeignKeyField(Link)
+    tag_id = pw.ForeignKeyField(Tag)
+
+    class Meta:
+        database = db
+        primary_key = pw.CompositeKey('link_id', 'tag_id')
+
 
 @fabbot.event
 async def on_ready():
@@ -100,7 +108,8 @@ async def mcu(ctx):
 #@fabbot.after_invoke(close_db_connection)
 @fabbot.command('tagadd',
                 pass_context=True,
-                brief='crea una tag per archiviare i link'
+                brief='crea una tag per archiviare i link',
+                hidden=True
                 )
 async def tagadd(ctx, *args):
     """Aggiunge uno (o più) tag per l'archiviazione dei link."""
@@ -115,7 +124,34 @@ async def tagadd(ctx, *args):
             await fabbot.say('Impossibile salvare il tag {}: tag già presente'.format(x.tag))
     db.close()
     return await fabbot.say('operazione terminata')
-    
+
+
+@fabbot.command('linkadd',
+                pass_context=False,
+                brief='aggiungi un link alla raccolta'
+                )
+async def linkadd(url: str, title: str, description: str):
+    """Aggiunge un link, provvisto di titolo e descrizione sommaria"""
+    db.connect()
+    try:
+        x = Link(url = url, title = title, description = description)
+        x.save()
+    except commands.errors.MissingRequiredArgument:
+        db.close()
+        return await fabbot.say('richiesta strutturata male. !help linkadd per ulteriori info')
+    except:
+        db.close()
+        return await fabbot.say('qualcosa è andato storto, spiacente')
+    db.close()
+    return await fabbot.say('link salvato')
+
+
+@fabbot.command('linklist',
+                brief='mostra l\'elenco dei link salvati'
+                )
+async def linklist():
+    return await fabbot.say('{}'.format('\n'.join(['**{}** <{}> *{}*'.format(x.title, x.url, x.description) for x in Link.select()])))
+
 
 # presa pari pari da https://github.com/ZeroEpoch1969/RubyRoseBot/blob/master/bot.py 
 @fabbot.command('uptime',
@@ -151,9 +187,9 @@ async def desiderata(ctx, *args):
 
 
 if __name__ == '__main__':
-    if not os.path.exists('fabsqlite.db'):
+    if not os.path.exists('fabdb.db'):
         logging.info('Nessun database trovato, ne creo uno e esco')
-        create_db_tables([Tag])
+        create_db_tables([Tag, Link, LinkToTag])
         sys.exit()
     logging.info('Database trovato')
     fabbot.run(secrets.miotoken)
