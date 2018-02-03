@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 
 import logging
-import discord
-import datetime
-import asyncio
 import time
 import os
 import sys
 import secrets
 import peewee as pw
-from discord import User
 from discord.ext import commands
 
 
@@ -23,17 +19,21 @@ def create_db_tables(tables=[]):
     with db:
         db.create_tables(tables)
 
+
 class BaseModel(pw.Model):
     class Meta:
         database = db
 
+
 class Tag(BaseModel):
     tag = pw.CharField(unique=True)
+
 
 class Link(BaseModel):
     title = pw.CharField()
     url = pw.CharField()
     description = pw.CharField()
+
 
 class LinkToTag(pw.Model):
     """A simple "through" table for many-to-many relationship."""
@@ -104,8 +104,6 @@ async def mcu(ctx):
                             )
 
 
-#@fabbot.before_invoke(open_db_connection)
-#@fabbot.after_invoke(close_db_connection)
 @fabbot.command('tagadd',
                 pass_context=True,
                 brief='crea una tag per archiviare i link',
@@ -113,7 +111,7 @@ async def mcu(ctx):
                 )
 async def tagadd(ctx, *args):
     """Aggiunge uno (o più) tag per l'archiviazione dei link."""
-    if len(args) < 1 :
+    if len(args) < 1:
         return await fabbot.say('Inserisci almeno una tag. Per maggiori informazioni digita !help addtag')
     db.connect()
     for x in args:
@@ -134,7 +132,7 @@ async def linkadd(url: str, title: str, description: str):
     """Aggiunge un link, provvisto di titolo e descrizione sommaria"""
     db.connect()
     try:
-        x = Link(url = url, title = title, description = description)
+        x = Link(url=url, title=title, description=description)
         x.save()
     except commands.errors.MissingRequiredArgument:
         db.close()
@@ -153,9 +151,9 @@ async def linklist():
     return await fabbot.say('{}'.format('\n'.join(['**{}** <{}> *{}*'.format(x.title, x.url, x.description) for x in Link.select()])))
 
 
-# presa pari pari da https://github.com/ZeroEpoch1969/RubyRoseBot/blob/master/bot.py 
+#presa pari pari da https://github.com/ZeroEpoch1969/RubyRoseBot/blob/master/bot.py
 @fabbot.command('uptime',
-                brief='visualizza uptime del bot',
+                brief='visualizza uptime del bot'
                 )
 async def uptime():
     """Visualizza il tempo di uptime del bot"""
@@ -186,6 +184,18 @@ async def desiderata(ctx, *args):
     return await fabbot.send_message(destination, '{} > da **{}**: {}'.format(ctx.message.timestamp, ctx.message.author, ctx.message.content))
 
 
+@fabbot.command('about',
+                brief='about this bot'
+                )
+async def about():
+    """Mostra info relative a questo bot"""
+    return await fabbot.say('```fabbot, a simple bot for managing fab academy discord channel.\n'
+                            'made by Simone Guercio - s.guercio@gmail.com\n'
+                            'code available at TODO inserire repo\n'
+                            'released under the GNU Affero General Public License v3```'
+                            )
+
+
 if __name__ == '__main__':
     if not os.path.exists('fabdb.db'):
         logging.info('Nessun database trovato, ne creo uno e esco')
@@ -193,4 +203,3 @@ if __name__ == '__main__':
         sys.exit()
     logging.info('Database trovato')
     fabbot.run(secrets.miotoken)
-
