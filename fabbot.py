@@ -96,11 +96,11 @@ async def mcu(ctx):
                             'oppure ID: **{}** \| Pin: **{}** da utilizzare con il client bluejeans'
                             ', scaricabile da <https://www.bluejeans.com/downloads>\n\n'
                             '{}'
-                            '*Regional reviews*: ID: **{}** \| pin: **{}**\n\n'
+                            '*Regional reviews*: ID: **{}** \| pin: **{}** \| url: {}\n\n'
                             'indirizzo screensharing \(nessun limite di connessioni\):'
                             ' http://screen.academany.org/'
                             .format(secrets.bjurl, secrets.bjid, secrets.bjpin, 'ip da inserire nel sistema di videoconferenza: **{}**\n\n'
-                                    if ctx.message.channel.id == '405377785176260609' else '', secrets.regionalid, secrets.regionalpin)
+                                    if ctx.message.channel.id == '405377785176260609' else '', secrets.regionalid, secrets.regionalpin, secrets.regionalurl)
                             .format(secrets.bjip)
                             )
 
