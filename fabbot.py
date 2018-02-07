@@ -135,7 +135,7 @@ async def linkadd(url: str, title: str, description: str):
     try:
         x = Link(url=url, title=title, description=description)
         x.save()
-    except commands.errors.MissingRequiredArgument:
+    except commands.errors.MissingRequiredArgument():
         db.close()
         return await fabbot.say('richiesta strutturata male. !help linkadd per ulteriori info')
     except:
