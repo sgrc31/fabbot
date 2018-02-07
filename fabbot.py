@@ -8,7 +8,6 @@ import secrets
 import peewee as pw
 from discord.ext import commands
 
-
 logging.basicConfig(level=logging.INFO)
 start_time = time.time()
 db = pw.SqliteDatabase('fabdb.db', pragmas=(('foreign_keys', True),))
@@ -135,15 +134,20 @@ async def linkadd(url: str, title: str, description: str):
     try:
         x = Link(url=url, title=title, description=description)
         x.save()
-    except commands.errors.MissingRequiredArgument():
-        db.close()
-        return await fabbot.say('richiesta strutturata male. !help linkadd per ulteriori info')
     except:
         db.close()
-        return await fabbot.say('qualcosa è andato storto, spiacente')
+        return await fabbot.say('qualcosa è andato storto, spiacente. Il link non è stato salvato')
     db.close()
     return await fabbot.say('link salvato')
 
+
+@linkadd.error
+async def linkadd_error(error, ctx):
+    if isinstance(error, commands.errors.MissingRequiredArgument):
+        db.close()
+        return await fabbot.send_message(ctx.message.channel, 'Argomenti mancanti. !help linkadd per l\'utilizzo corretto')
+    else:
+        return await fabbot.send_message(ctx.message.channel, 'Qualcosa è andato storto, ma non so esattamente cosa... Auguri a fare debug')
 
 @fabbot.command('linklist',
                 brief='mostra l\'elenco dei link salvati'
