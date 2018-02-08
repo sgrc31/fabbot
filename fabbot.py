@@ -11,7 +11,7 @@ from discord.ext import commands
 logging.basicConfig(level=logging.INFO)
 start_time = time.time()
 db = pw.SqliteDatabase('fabdb.db', pragmas=(('foreign_keys', True),))
-fabbot = commands.Bot(command_prefix=commands.when_mentioned_or('!'))
+fabbot = commands.Bot(command_prefix='!')
 
 
 def create_db_tables(tables=[]):
