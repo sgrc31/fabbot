@@ -129,7 +129,10 @@ async def tagadd(ctx, *args):
                 brief='aggiungi un link alla raccolta'
                 )
 async def linkadd(url: str, title: str, description: str):
-    """Aggiunge un link, provvisto di titolo e descrizione sommaria"""
+    """Aggiunge un link, provvisto di titolo e descrizione sommaria.\n
+    I campi title e description, se composti da più parole, vanno messi tra doppi apici. Esempio:\nn
+    !linkadd http://archive.fabacademy.org/ \"Archivi Fab Academy\" \"archivio contenente le documentazioni
+    di tutte le edizioni di Fab Academy\""""
     db.connect()
     try:
         x = Link(url=url, title=title, description=description)
