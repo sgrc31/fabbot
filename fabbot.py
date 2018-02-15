@@ -148,8 +148,8 @@ async def linkadd_error(error, ctx):
     if isinstance(error, commands.errors.MissingRequiredArgument):
         db.close()
         return await fabbot.send_message(ctx.message.channel, 'Argomenti mancanti. !help linkadd per l\'utilizzo corretto')
-    else:
-        return await fabbot.send_message(ctx.message.channel, 'Qualcosa è andato storto, ma non so esattamente cosa... Auguri a fare debug')
+    #else:
+    #    return await fabbot.send_message(ctx.message.channel, 'Qualcosa è andato storto, ma non so esattamente cosa... Auguri a fare debug')
 
 @fabbot.command('linklist',
                 brief='mostra l\'elenco dei link salvati'
